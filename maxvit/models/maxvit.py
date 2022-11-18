@@ -167,6 +167,9 @@ class Attention(tf.keras.layers.Layer):
 
     self.q_scale = self.head_size ** -0.5
 
+    # Todo
+    self.compute_dtype = tf.dtypes.float32
+
   def build(self, query_shape):
     num_attn_dims = query_shape.rank - 2   # -2 to account for bsz, hidden size
     assert num_attn_dims < 6, 'Only support at most 6 attention dims.'
