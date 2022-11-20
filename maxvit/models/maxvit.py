@@ -1184,39 +1184,39 @@ class MaxViT(tf.keras.layers.Layer):
 
         bid += 1
 
-    # Pre-classification layer norm
-    self._final_layer_norm = tf.keras.layers.LayerNormalization(
-        axis=-1,
-        epsilon=config.ln_epsilon,
-        dtype=config.ln_dtype,
-        name='final_layer_norm')
-
-    # Classification head
-    cls_layers = []
-    if self._config.cls_hsize:
-      assert isinstance(self._config.cls_hsize, int)
-      if self._config.cls_hsize == -1:
-        cls_hsize = self._config.hidden_size[-1]
-      else:
-        cls_hsize = self._config.cls_hsize
-      inner_dense = TrailDense(
-          cls_hsize,
-          kernel_initializer=self._config.kernel_initializer,
-          bias_initializer=self._config.bias_initializer,
-          name='inner_dense')
-      cls_layers.append(inner_dense)
-      cls_layers.append(tf.keras.layers.Activation(tf.nn.tanh, name='tanh'))
-
-    logit_dense = TrailDense(
-        self._config.num_classes,
-        kernel_initializer=self._config.kernel_initializer,
-        bias_initializer=tf.constant_initializer(self._config.cls_bias_init),
-        name='logit_dense')
-    cls_layers.append(logit_dense)
-
-    self._cls_head = tf.keras.Sequential(
-        layers=cls_layers,
-        name='cls_head')
+    # # Pre-classification layer norm
+    # self._final_layer_norm = tf.keras.layers.LayerNormalization(
+    #     axis=-1,
+    #     epsilon=config.ln_epsilon,
+    #     dtype=config.ln_dtype,
+    #     name='final_layer_norm')
+    #
+    # # Classification head
+    # cls_layers = []
+    # if self._config.cls_hsize:
+    #   assert isinstance(self._config.cls_hsize, int)
+    #   if self._config.cls_hsize == -1:
+    #     cls_hsize = self._config.hidden_size[-1]
+    #   else:
+    #     cls_hsize = self._config.cls_hsize
+    #   inner_dense = TrailDense(
+    #       cls_hsize,
+    #       kernel_initializer=self._config.kernel_initializer,
+    #       bias_initializer=self._config.bias_initializer,
+    #       name='inner_dense')
+    #   cls_layers.append(inner_dense)
+    #   cls_layers.append(tf.keras.layers.Activation(tf.nn.tanh, name='tanh'))
+    #
+    # logit_dense = TrailDense(
+    #     self._config.num_classes,
+    #     kernel_initializer=self._config.kernel_initializer,
+    #     bias_initializer=tf.constant_initializer(self._config.cls_bias_init),
+    #     name='logit_dense')
+    # cls_layers.append(logit_dense)
+    #
+    # self._cls_head = tf.keras.Sequential(
+    #     layers=cls_layers,
+    #     name='cls_head')
 
   def call(self, inputs, training):
     logging.info('Network inputs: shape %s, dtype %s.',
@@ -1236,17 +1236,17 @@ class MaxViT(tf.keras.layers.Layer):
                    idx + 1, output.shape, output.dtype)
       self.endpoints['stage_{}'.format(idx + 1)] = output
 
-    # global average pooling
-    reduce_axes = list(range(1, output.shape.rank - 1))
-    output = tf.reduce_mean(output, axis=reduce_axes)
-    self.endpoints['pooled_features'] = output
+    # # global average pooling
+    # reduce_axes = list(range(1, output.shape.rank - 1))
+    # output = tf.reduce_mean(output, axis=reduce_axes)
+    # self.endpoints['pooled_features'] = output
 
-    # final layer normalization
-    output = self._final_layer_norm(output)
-    self.endpoints['normed_features'] = output
-
-    # classification head
-    output = self._cls_head(output, training=training)
-    self.endpoints['logits'] = output
+    # # final layer normalization
+    # output = self._final_layer_norm(output)
+    # self.endpoints['normed_features'] = output
+    #
+    # # classification head
+    # output = self._cls_head(output, training=training)
+    # self.endpoints['logits'] = output
 
     return output
